@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CareChain - Emergency Donation Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial; background:#eef2f7; padding:15px; }
+    h2 { text-align:center; }
+
+    .card {
+      background:white;
+      padding:15px;
+      margin-bottom:15px;
+      border-radius:15px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    button {
+      background:#2e7d32;
+      color:white;
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      width:100%;
+      margin-top:5px;
+    }
+
+    input, textarea, select {
+      width:100%;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      margin-bottom:10px;
+    }
+
+    .nav button {
+      width:32%;
+      background:#1565c0;
+    }
+
+    img, video {
+      width:100%;
+      border-radius:10px;
+      margin-bottom:10px;
+    }
+
+    .badge {
+      background:#eee;
+      padding:5px 10px;
+      border-radius:8px;
+      font-size:12px;
+      display:inline-block;
+      margin-bottom:8px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>CareChain</h2>
+<p style="text-align:center;">Donasi Darurat / Emergency Donation</p>
+
+<div class="nav">
+  <button onclick="showPage('home')">Home</button>
+  <button onclick="showPage('submit')">Ajukan</button>
+  <button onclick="showPage('report')">Transparansi</button>
+</div>
+
+<!-- HOME -->
+<div id="home" class="page"></div>
+
+<!-- AJUKAN -->
+<div id="submit" class="page" style="display:none;">
+  <div class="card">
+    <h3>Ajukan Bantuan / Submit Case</h3>
+
+    <select id="category">
+      <option>Orang Sakit / Medical</option>
+      <option>Bencana Alam / Disaster</option>
+      <option>Beasiswa / Scholarship</option>
+      <option>Dana Darurat / Emergency Fund</option>
+      <option>Bantuan Sosial / Social Aid</option>
+    </select>
+
+    <input type="text" id="title" placeholder="Judul Kasus / Title">
+    <textarea id="desc" placeholder="Deskripsi / Description"></textarea>
+
+    <input type="file" id="imgInput" accept="image/*">
+    <input type="file" id="vidInput" accept="video/*">
+
+    <button onclick="addCase()">Kirim / Submit</button>
+  </div>
+</div>
+
+<!-- TRANSPARANSI -->
+<div id="report" class="page" style="display:none;">
+  <div class="card">
+    <h3>Transparansi / Transparency</h3>
+    <p>100% donasi ke penerima / 100% donation goes to recipient</p>
+    <p>Biaya layanan sukarela / Optional service fee (1–5%)</p>
+    <p><i>Simulasi / Simulation only</i></p>
+    <div id="reportData"></div>
+  </div>
+</div>
+
+<script>
+let cases = [];
+
+function showPage(page){
+  let pages = document.getElementsByClassName("page");
+  for(let i=0;i<pages.length;i++){
+    pages[i].style.display="none";
+  }
+  document.getElementById(page).style.display="block";
+}
+
+function addCase(){
+  let category = document.getElementById("category").value;
+  let title = document.getElementById("title").value;
+  let desc = document.getElementById("desc").value;
+
+  if(!title || !desc){
+    alert("Isi data dulu / Fill required fields");
+    return;
+  }
+
+  let imgFile = document.getElementById("imgInput").files[0];
+  let vidFile = document.getElementById("vidInput").files[0];
+
+  let imgURL = imgFile ? URL.createObjectURL(imgFile) : "";
+  let vidURL = vidFile ? URL.createObjectURL(vidFile) : "";
+
+  cases.push({
+    category, title, desc, img:imgURL, vid:vidURL, total:0
+  });
+
+  alert("Berhasil ditambahkan!");
+  renderCases();
+}
+
+function donate(index){
+  let amount = document.getElementById("amount"+index).value;
+  let fee = document.getElementById("fee"+index).value;
+
+  cases[index].total += parseInt(amount);
+
+  alert("Simulasi donasi: " + amount + " Pi | Fee: " + fee + "%");
+  renderCases();
+}
+
+function renderCases(){
+  let html = "";
+  let report = "";
+
+  cases.forEach((c, i)=>{
+    html += `
+    <div class="card">
+      <div class="badge">${c.category}</div>
+      <h3>${c.title}</h3>
+      <p>${c.desc}</p>
+
+      ${c.img ? `<img src="${c.img}">` : ""}
+      ${c.vid ? `<video controls src="${c.vid}"></video>` : ""}
+
+      <p><b>Total:</b> ${c.total} Pi</p>
+
+      <p>Pilih Donasi / Choose Amount:</p>
+      <select id="amount${i}">
+        <option value="1">1 Pi</option>
+        <option value="5">5 Pi</option>
+        <option value="10">10 Pi</option>
+        <option value="50">50 Pi</option>
+      </select>
+
+      <p>Biaya layanan / Service fee:</p>
+      <select id="fee${i}">
+        <option value="0">0%</option>
+        <option value="1">1%</option>
+        <option value="3">3%</option>
+        <option value="5">5%</option>
+      </select>
+
+      <button onclick="donate(${i})">Donasi Pi</button>
+    </div>
+    `;
+
+    report += `
+      <p><b>${c.title}</b> - ${c.total} Pi digunakan / used for aid</p>
+      <hr>
+    `;
+  });
+
+  document.getElementById("home").innerHTML = html;
+  document.getElementById("reportData").innerHTML = report;
+}
+</script>
+
+<!-- NOTICE -->
+<div style="background:#fff3cd; padding:10px; border-radius:10px; margin-top:20px;">
+  <b>Prototype Notice:</b>
+  <p style="font-size:14px;">
+    ID: Aplikasi ini masih tahap pengembangan, semua transaksi masih simulasi. <br><br>
+    EN: This app is a prototype. All transactions are simulated and will be upgraded with Pi integration.
+  </p>
+</div>
+
+</body>
+</html>
