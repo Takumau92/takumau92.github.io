@@ -1,102 +1,224 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>CareChain - Donasi Darurat</title>
+  <title>CareChain - Emergency Donation Platform</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { 
-      font-family: Arial; 
-      background: #eef2f7; 
-      padding: 20px; 
-    }
-
-    h2 {
-      text-align: center;
-    }
+    body { font-family: Arial; background:#eef2f7; padding:15px; }
+    h2 { text-align:center; }
 
     .card {
-      background: white;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background:white;
+      padding:15px;
+      margin-bottom:15px;
+      border-radius:15px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.1);
     }
 
     button {
-      background: #2e7d32;
-      color: white;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      width: 100%;
+      background:#2e7d32;
+      color:white;
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      width:100%;
+      margin-top:5px;
     }
 
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 10px;
+    input, textarea, select {
+      width:100%;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      margin-bottom:10px;
+    }
+
+    .nav button {
+      width:32%;
+      background:#1565c0;
+    }
+
+    img, video {
+      width:100%;
+      border-radius:10px;
+      margin-bottom:10px;
+    }
+
+    .badge {
+      background:#eee;
+      padding:5px 10px;
+      border-radius:8px;
+      font-size:12px;
+      display:inline-block;
+      margin-bottom:8px;
     }
   </style>
 </head>
 
 <body>
 
-<h2>CareChain - Donasi Darurat</h2>
+<h2>CareChain</h2>
+<p style="text-align:center;">Donasi Darurat / Emergency Donation</p>
 
-<div class="card">
-  <h3>Bantuan Operasi</h3>
-  <p>Anak membutuhkan operasi segera.</p>
-
-  <p>Terkumpul: 50 Pi / 100 Pi</p>
-  <div style="background:#ddd; border-radius:10px;">
-    <div style="width:50%; background:green; height:10px; border-radius:10px;"></div>
-  </div><br>
-
-  <button onclick="donate()">Donasi (Pi)</button>
+<div class="nav">
+  <button onclick="showPage('home')">Home</button>
+  <button onclick="showPage('submit')">Ajukan</button>
+  <button onclick="showPage('report')">Transparansi</button>
 </div>
 
-<div class="card">
-  <h3>Bencana Alam</h3>
-  <p>Kebutuhan makanan dan obat-obatan.</p>
+<!-- HOME -->
+<div id="home" class="page"></div>
 
-  <p>Terkumpul: 30 Pi / 200 Pi</p>
-  <div style="background:#ddd; border-radius:10px;">
-    <div style="width:15%; background:green; height:10px; border-radius:10px;"></div>
-  </div><br>
+<!-- AJUKAN -->
+<div id="submit" class="page" style="display:none;">
+  <div class="card">
+    <h3>Ajukan Bantuan / Submit Case</h3>
 
-  <button onclick="donate()">Donasi (Pi)</button>
+    <select id="category">
+      <option>Orang Sakit / Medical</option>
+      <option>Bencana Alam / Disaster</option>
+      <option>Beasiswa / Scholarship</option>
+      <option>Dana Darurat / Emergency Fund</option>
+      <option>Bantuan Sosial / Social Aid</option>
+    </select>
+
+    <input type="text" id="title" placeholder="Judul Kasus / Title">
+    <textarea id="desc" placeholder="Deskripsi / Description"></textarea>
+
+    <input type="file" id="imgInput" accept="image/*">
+    <input type="file" id="vidInput" accept="video/*">
+
+    <button onclick="addCase()">Kirim / Submit</button>
+  </div>
 </div>
 
-<h3>Ajukan Bantuan</h3>
-
-<input type="text" placeholder="Judul Kasus">
-<textarea placeholder="Deskripsi kebutuhan"></textarea>
-<button onclick="submitCase()">Kirim</button>
+<!-- TRANSPARANSI -->
+<div id="report" class="page" style="display:none;">
+  <div class="card">
+    <h3>Transparansi / Transparency</h3>
+    <p>100% donasi ke penerima / 100% donation goes to recipient</p>
+    <p>Biaya layanan sukarela / Optional service fee (1–5%)</p>
+    <p><i>Simulasi / Simulation only</i></p>
+    <div id="reportData"></div>
+  </div>
+</div>
 
 <script>
-function donate(){
-  alert("Fitur donasi akan terhubung ke Pi nanti");
+let cases = [];
+
+function showPage(page){
+  let pages = document.getElementsByClassName("page");
+  for(let i=0;i<pages.length;i++){
+    pages[i].style.display="none";
+  }
+  document.getElementById(page).style.display="block";
 }
 
-function submitCase(){
-  alert("Pengajuan berhasil dikirim!");
+function addCase(){
+  let category = document.getElementById("category").value;
+  let title = document.getElementById("title").value;
+  let desc = document.getElementById("desc").value;
+
+  if(!title || !desc){
+    alert("Isi data dulu / Fill required fields");
+    return;
+  }
+
+  let imgFile = document.getElementById("imgInput").files[0];
+  let vidFile = document.getElementById("vidInput").files[0];
+
+  let imgURL = imgFile ? URL.createObjectURL(imgFile) : "";
+  let vidURL = vidFile ? URL.createObjectURL(vidFile) : "";
+
+  cases.push({
+    category, title, desc, img:imgURL, vid:vidURL, total:0
+  });
+
+  alert("Berhasil ditambahkan!");
+  renderCases();
+}
+
+function donate(index){
+  let amount = document.getElementById("amount"+index).value;
+  let fee = document.getElementById("fee"+index).value;
+
+  cases[index].total += parseInt(amount);
+
+  alert("Simulasi donasi: " + amount + " Pi | Fee: " + fee + "%");
+  renderCases();
+}
+
+function renderCases(){
+  let html = "";
+  let report = "";
+
+  cases.forEach((c, i)=>{
+
+    html += `
+    <div class="card">
+      <div class="badge">${c.category}</div>
+      <h3>${c.title}</h3>
+      <p>${c.desc}</p>
+
+      ${c.img ? `<img src="${c.img}">` : ""}
+      ${c.vid ? `<video controls src="${c.vid}"></video>` : ""}
+
+      <p><b>Total:</b> ${c.total} Pi</p>
+
+      <p>Pilih Donasi / Choose Amount:</p>
+      <select id="amount${i}">
+        <option value="1">1 Pi</option>
+        <option value="5">5 Pi</option>
+        <option value="10">10 Pi</option>
+        <option value="50">50 Pi</option>
+      </select>
+
+      <p>Biaya layanan / Service fee:</p>
+      <select id="fee${i}">
+        <option value="0">0%</option>
+        <option value="1">1%</option>
+        <option value="3">3%</option>
+        <option value="5">5%</option>
+      </select>
+
+      <button onclick="donate(${i})">Donasi Pi</button>
+    </div>
+    `;
+  });
+
+  document.getElementById("home").innerHTML = html;
+  document.getElementById("reportData").innerHTML = report;
 }
 </script>
+
+<!-- NOTICE -->
+<div style="background:#fff3cd; padding:10px; border-radius:10px; margin-top:20px;">
+  <b>Prototype Notice:</b>
+  <p style="font-size:14px;">
+    ID: Aplikasi ini masih tahap pengembangan, semua transaksi masih simulasi. <br><br>
+    EN: This app is a prototype. All transactions are simulated and will be upgraded with Pi integration.
+  </p>
+</div>
 <hr>
 
 <div class="card">
   <h3>Donasi Pi Network</h3>
-  <p>Dukung CareChain dengan mengirim Pi ke alamat berikut:</p>
+  <p>Dukung CareChain dengan mengirim Pi ke alamat dompet berikut:</p>
 
   <p style="word-break:break-all;">
     <b>GC5UBU6LF5DKAR4J6PKJ5VWYHOORC6AKKHTQNZKXBWYAC3QHTHLAXKHU</b>
   </p>
 
-  <button onclick="navigator.clipboard.writeText('GC5UBU6LF5DKAR4J6PKJ5VWYHOORC6AKKHTQNZKXBWYAC3QHTHLAXKHU'); alert('Alamat Pi disalin')">
-    Salin Alamat Pi
+  <button onclick="copyPiAddress()">
+    Salin Alamat Dompet Pi
   </button>
 </div>
+
+<script>
+function copyPiAddress(){
+  navigator.clipboard.writeText("GC5UBU6LF5DKAR4J6PKJ5VWYHOORC6AKKHTQNZKXBWYAC3QHTHLAXKHU");
+  alert("Alamat dompet Pi sudah disalin");
+}
+</script>
 </body>
-</html>
+  </html>
