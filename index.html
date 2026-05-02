@@ -84,9 +84,7 @@ function submitCase(){
   alert("Pengajuan berhasil dikirim!");
 }
 </script>
-d
-</body>
-  <hr>
+<hr>
 
 <div class="card">
   <h3>Donasi Pi Network</h3>
@@ -96,13 +94,9 @@ d
     <b>GC5UBU6LF5DKAR4J6PKJ5VWYHOORC6AKKHTQNZKXBWYAC3QHTHLAXKHU</b>
   </p>
 
-  <button onclick="copyAddress()">Salin Alamat Pi</button>
+  <button onclick="navigator.clipboard.writeText('GC5UBU6LF5DKAR4J6PKJ5VWYHOORC6AKKHTQNZKXBWYAC3QHTHLAXKHU'); alert('Alamat Pi disalin')">
+    Salin Alamat Pi
+  </button>
 </div>
-
-<script>
-function copyAddress(){
-  navigator.clipboard.writeText("GC5UBU6LF5DKAR4J6PKJ5VWYHOORC6AKKHTQNZKXBWYAC3QHTHLAXKHU");
-  alert("Alamat Pi sudah disalin");
-}
-</script>
+</body>
 </html>
