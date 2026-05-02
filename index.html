@@ -3,7 +3,6 @@
 <head>
   <title>CareChain - Donasi Darurat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
     body { 
       font-family: Arial; 
@@ -30,7 +29,6 @@
       border: none;
       border-radius: 8px;
       width: 100%;
-      cursor: pointer;
     }
 
     input, textarea {
@@ -71,15 +69,24 @@
   <button onclick="donate()">Donasi (Pi)</button>
 </div>
 
-<div class="card">
-  <h3>Ajukan Bantuan</h3>
+<h3>Ajukan Bantuan</h3>
 
-  <input type="text" placeholder="Judul Kasus">
-  <textarea placeholder="Deskripsi kebutuhan"></textarea>
-  <button onclick="submitCase()">Kirim</button>
-</div>
+<input type="text" placeholder="Judul Kasus">
+<textarea placeholder="Deskripsi kebutuhan"></textarea>
+<button onclick="submitCase()">Kirim</button>
 
-<hr>
+<script>
+function donate(){
+  alert("Fitur donasi akan terhubung ke Pi nanti");
+}
+
+function submitCase(){
+  alert("Pengajuan berhasil dikirim!");
+}
+</script>
+d
+</body>
+  <hr>
 
 <div class="card">
   <h3>Donasi Pi Network</h3>
@@ -93,19 +100,9 @@
 </div>
 
 <script>
-function donate(){
-  alert("Fitur donasi akan terhubung ke Pi nanti");
-}
-
-function submitCase(){
-  alert("Pengajuan berhasil dikirim!");
-}
-
 function copyAddress(){
   navigator.clipboard.writeText("GC5UBU6LF5DKAR4J6PKJ5VWYHOORC6AKKHTQNZKXBWYAC3QHTHLAXKHU");
   alert("Alamat Pi sudah disalin");
 }
 </script>
-
-</body>
 </html>
