@@ -1,224 +1,276 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-  <title>CareChain - Emergency Donation Platform</title>
+  <title>Carechain</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    body { font-family: Arial; background:#eef2f7; padding:15px; }
-    h2 { text-align:center; }
-
-    .card {
-      background:white;
-      padding:15px;
-      margin-bottom:15px;
-      border-radius:15px;
-      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    body {
+      font-family: Arial;
+      margin: 0;
+      background: #e9ebee;
     }
 
-    button {
-      background:#2e7d32;
-      color:white;
-      padding:10px;
-      border:none;
-      border-radius:8px;
-      width:100%;
-      margin-top:5px;
+    /* HEADER */
+    .header {
+      background: #1877f2;
+      color: white;
+      padding: 12px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
     }
 
-    input, textarea, select {
-      width:100%;
-      padding:10px;
-      border-radius:8px;
-      border:1px solid #ccc;
-      margin-bottom:10px;
+    /* NAV */
+    .nav {
+      display: flex;
     }
 
     .nav button {
-      width:32%;
-      background:#1565c0;
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: #fff;
+      cursor: pointer;
+      font-weight: bold;
     }
 
-    img, video {
-      width:100%;
-      border-radius:10px;
-      margin-bottom:10px;
+    .nav button:hover {
+      background: #f0f0f0;
+    }
+
+    /* POST CARD */
+    .card {
+      background: white;
+      margin: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
     .badge {
-      background:#eee;
-      padding:5px 10px;
-      border-radius:8px;
-      font-size:12px;
-      display:inline-block;
-      margin-bottom:8px;
+      display: inline-block;
+      background: #f1f1f1;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    img, video {
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      width: 100%;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    .donate-btn {
+      background: #42b72a;
+      color: white;
+    }
+
+    .admin-btn {
+      background: #333;
+      color: white;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .page { display: none; }
+    .active { display: block; }
+
+    .progress {
+      background: #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+
+    .bar {
+      height: 10px;
+      background: #42b72a;
+      width: 0%;
     }
   </style>
 </head>
 
 <body>
 
-<h2>CareChain</h2>
-<p style="text-align:center;">Donasi Darurat / Emergency Donation</p>
+<div class="header">Carechain</div>
 
 <div class="nav">
   <button onclick="showPage('home')">Home</button>
   <button onclick="showPage('submit')">Ajukan</button>
-  <button onclick="showPage('report')">Transparansi</button>
+  <button onclick="showPage('admin')">Dashboard</button>
 </div>
 
-<!-- HOME -->
-<div id="home" class="page"></div>
+<!-- HOME FEED -->
+<div id="home" class="page active"></div>
 
-<!-- AJUKAN -->
-<div id="submit" class="page" style="display:none;">
+<!-- SUBMIT -->
+<div id="submit" class="page">
   <div class="card">
-    <h3>Ajukan Bantuan / Submit Case</h3>
+    <h3>Ajukan Bantuan</h3>
 
-    <select id="category">
-      <option>Orang Sakit / Medical</option>
-      <option>Bencana Alam / Disaster</option>
-      <option>Beasiswa / Scholarship</option>
-      <option>Dana Darurat / Emergency Fund</option>
-      <option>Bantuan Sosial / Social Aid</option>
-    </select>
+    <input id="name" placeholder="Nama">
+    <input id="title" placeholder="Judul Kasus">
+    <textarea id="desc" placeholder="Deskripsi masalah"></textarea>
+    <input id="cost" placeholder="Estimasi biaya (Pi)">
+    <input type="file" id="img">
 
-    <input type="text" id="title" placeholder="Judul Kasus / Title">
-    <textarea id="desc" placeholder="Deskripsi / Description"></textarea>
-
-    <input type="file" id="imgInput" accept="image/*">
-    <input type="file" id="vidInput" accept="video/*">
-
-    <button onclick="addCase()">Kirim / Submit</button>
+    <button onclick="addPost()" class="donate-btn">Kirim</button>
   </div>
 </div>
 
-<!-- TRANSPARANSI -->
-<div id="report" class="page" style="display:none;">
+<!-- ADMIN DASHBOARD -->
+<div id="admin" class="page">
   <div class="card">
-    <h3>Transparansi / Transparency</h3>
-    <p>100% donasi ke penerima / 100% donation goes to recipient</p>
-    <p>Biaya layanan sukarela / Optional service fee (1–5%)</p>
-    <p><i>Simulasi / Simulation only</i></p>
-    <div id="reportData"></div>
+    <h3>Carechain Dashboard</h3>
+    <input type="password" id="pass" placeholder="Password admin">
+    <button onclick="loginAdmin()">Login</button>
   </div>
+
+  <div id="adminPanel"></div>
 </div>
 
 <script>
-let cases = [];
+let posts = [];
+let admin = false;
 
+/* NAV */
 function showPage(page){
-  let pages = document.getElementsByClassName("page");
-  for(let i=0;i<pages.length;i++){
-    pages[i].style.display="none";
-  }
-  document.getElementById(page).style.display="block";
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
 }
 
-function addCase(){
-  let category = document.getElementById("category").value;
+/* ADD POST */
+function addPost(){
+  let name = document.getElementById("name").value;
   let title = document.getElementById("title").value;
   let desc = document.getElementById("desc").value;
+  let cost = document.getElementById("cost").value;
+  let imgFile = document.getElementById("img").files[0];
 
-  if(!title || !desc){
-    alert("Isi data dulu / Fill required fields");
+  if(!name || !title || !desc){
+    alert("Isi lengkap dulu");
     return;
   }
 
-  let imgFile = document.getElementById("imgInput").files[0];
-  let vidFile = document.getElementById("vidInput").files[0];
-
   let imgURL = imgFile ? URL.createObjectURL(imgFile) : "";
-  let vidURL = vidFile ? URL.createObjectURL(vidFile) : "";
 
-  cases.push({
-    category, title, desc, img:imgURL, vid:vidURL, total:0
+  posts.push({
+    name,
+    title,
+    desc,
+    cost,
+    img: imgURL,
+    raised: 0,
+    status: "active"
   });
 
-  alert("Berhasil ditambahkan!");
-  renderCases();
+  alert("Berhasil dikirim");
+  render();
 }
 
-function donate(index){
-  let amount = document.getElementById("amount"+index).value;
-  let fee = document.getElementById("fee"+index).value;
+/* DONATE (SIMULATION / PI READY PLACEHOLDER) */
+function donate(i){
+  let amount = prompt("Masukkan jumlah donasi (Pi):");
+  if(!amount) return;
 
-  cases[index].total += parseInt(amount);
+  posts[i].raised += parseInt(amount);
 
-  alert("Simulasi donasi: " + amount + " Pi | Fee: " + fee + "%");
-  renderCases();
+  alert("Donasi simulasi: " + amount + " Pi (nanti diganti Pi SDK real)");
+  render();
 }
 
-function renderCases(){
+/* ADMIN LOGIN */
+function loginAdmin(){
+  let pass = document.getElementById("pass").value;
+  if(pass === "292603$"){
+    admin = true;
+    alert("Login berhasil");
+    renderAdmin();
+  } else {
+    alert("Password salah");
+  }
+}
+
+/* ADMIN ACTION */
+function closeCase(i){
+  posts[i].status = "closed";
+  render();
+  renderAdmin();
+}
+
+/* RENDER HOME */
+function render(){
   let html = "";
-  let report = "";
 
-  cases.forEach((c, i)=>{
-
+  posts.forEach((p,i)=>{
     html += `
     <div class="card">
-      <div class="badge">${c.category}</div>
-      <h3>${c.title}</h3>
-      <p>${c.desc}</p>
+      <span class="badge">${p.status}</span>
+      <h3>${p.title}</h3>
+      <b>${p.name}</b>
+      <p>${p.desc}</p>
 
-      ${c.img ? `<img src="${c.img}">` : ""}
-      ${c.vid ? `<video controls src="${c.vid}"></video>` : ""}
+      ${p.img ? `<img src="${p.img}">` : ""}
 
-      <p><b>Total:</b> ${c.total} Pi</p>
+      <p>Target: ${p.cost} Pi</p>
+      <p>Terkumpul: ${p.raised} Pi</p>
 
-      <p>Pilih Donasi / Choose Amount:</p>
-      <select id="amount${i}">
-        <option value="1">1 Pi</option>
-        <option value="5">5 Pi</option>
-        <option value="10">10 Pi</option>
-        <option value="50">50 Pi</option>
-      </select>
+      <div class="progress">
+        <div class="bar" style="width:${Math.min((p.raised/p.cost)*100,100)}%"></div>
+      </div>
 
-      <p>Biaya layanan / Service fee:</p>
-      <select id="fee${i}">
-        <option value="0">0%</option>
-        <option value="1">1%</option>
-        <option value="3">3%</option>
-        <option value="5">5%</option>
-      </select>
-
-      <button onclick="donate(${i})">Donasi Pi</button>
+      <button class="donate-btn" onclick="donate(${i})">Donasi Pi</button>
     </div>
     `;
   });
 
   document.getElementById("home").innerHTML = html;
-  document.getElementById("reportData").innerHTML = report;
 }
+
+/* RENDER ADMIN */
+function renderAdmin(){
+  if(!admin) return;
+
+  let html = "";
+
+  posts.forEach((p,i)=>{
+    html += `
+    <div class="card">
+      <h3>${p.title}</h3>
+      <p>Status: ${p.status}</p>
+      <p>Terkumpul: ${p.raised} / ${p.cost} Pi</p>
+
+      <button class="admin-btn" onclick="closeCase(${i})">
+        Tandai Selesai
+      </button>
+    </div>
+    `;
+  });
+
+  document.getElementById("adminPanel").innerHTML = html;
+}
+
+/* INIT */
+render();
 </script>
 
-<!-- NOTICE -->
-<div style="background:#fff3cd; padding:10px; border-radius:10px; margin-top:20px;">
-  <b>Prototype Notice:</b>
-  <p style="font-size:14px;">
-    ID: Aplikasi ini masih tahap pengembangan, semua transaksi masih simulasi. <br><br>
-    EN: This app is a prototype. All transactions are simulated and will be upgraded with Pi integration.
-  </p>
-</div>
-<hr>
-
-<div class="card">
-  <h3>Donasi Pi Network</h3>
-  <p>Dukung CareChain dengan mengirim Pi ke alamat dompet berikut:</p>
-
-  <p style="word-break:break-all;">
-    <b>GD66IDDTAFLJHGDLNVPSYA4MYPMKDBBKWD5C3SQ2MEZTED7FCKRXELMR</b>
-  </p>
-
-  <button onclick="copyPiAddress()">
-    Salin Alamat Dompet Pi
-  </button>
-</div>
-
-<script>
-function copyPiAddress(){
-  navigator.clipboard.writeText("GC5UBU6LF5DKAR4J6PKJ5VWYHOORC6AKKHTQNZKXBWYAC3QHTHLAXKHU");
-  alert("Alamat dompet Pi sudah disalin");
-}
-</script>
 </body>
-  </html>
+</html>
