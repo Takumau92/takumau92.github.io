@@ -6,27 +6,66 @@
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
 
-<body style="text-align:center;font-family:Arial;padding:40px">
+<body style="font-family:Arial;text-align:center;padding-top:50px;background:#f3f3f3;">
 
-<h3>CareChain</h3>
+<h1 style="color:#5b2d90;">CareChain</h1>
 
-<button onclick="donate()">Donate 1 Pi</button>
+<button id="donateBtn"
+style="
+padding:15px 30px;
+font-size:18px;
+background:#6f42c1;
+color:white;
+border:none;
+border-radius:10px;
+cursor:pointer;
+">
+Donate 1 Pi
+</button>
 
 <script>
-Pi.init({ version: "2.0" });
+Pi.init({ version: "2.0", sandbox: true });
 
-async function donate() {
+document.getElementById("donateBtn").onclick = async function () {
+
   try {
-    await Pi.authenticate(["payments"]);
-    await Pi.createPayment({
-      amount: 1,
-      memo: "CareChain Donation"
-    });
-    alert("Konfirmasi di Pi Wallet");
-  } catch(e) {
-    alert("Gagal");
+
+    const scopes = ['payments'];
+
+    await Pi.authenticate(scopes);
+
+    await Pi.createPayment(
+      {
+        amount: 1,
+        memo: "CareChain Donation",
+        metadata: { type: "donation" }
+      },
+      {
+        onReadyForServerApproval: function(paymentId) {
+          console.log(paymentId);
+        },
+
+        onReadyForServerCompletion: function(paymentId, txid) {
+          alert("Payment Success");
+        },
+
+        onCancel: function(paymentId) {
+          alert("Payment Cancelled");
+        },
+
+        onError: function(error) {
+          console.log(error);
+          alert("Payment Error");
+        }
+      }
+    );
+
+  } catch (e) {
+    console.log(e);
+    alert("Authentication failed");
   }
-}
+
+};
 </script>
 
 </body>
