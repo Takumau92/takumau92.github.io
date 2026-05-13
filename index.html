@@ -1,175 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Carechain</title>
+  <title>CareChain</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
-  <style>
-    body { font-family: Arial; margin: 0; background: #e9ebee; }
-    .header { background:#1877f2; color:white; padding:12px; text-align:center; font-size:20px; font-weight:bold; }
-    .nav { display:flex; }
-    .nav button { flex:1; padding:10px; border:none; background:#fff; font-weight:bold; }
-    .page { display:none; }
-    .active { display:block; }
-    .card { background:white; margin:10px; padding:12px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-    .badge { background:#f1f1f1; padding:5px 8px; border-radius:8px; font-size:12px; }
-    img { width:100%; border-radius:10px; margin-top:10px; }
-    button { padding:10px; border:none; border-radius:8px; width:100%; margin-top:8px; }
-    .donate { background:#42b72a; color:white; }
-    .admin { background:#333; color:white; }
-    input, textarea { width:100%; padding:10px; margin-top:8px; border-radius:8px; border:1px solid #ccc; }
-    .progress { background:#ddd; border-radius:8px; overflow:hidden; }
-    .bar { height:10px; background:#42b72a; }
-  </style>
 </head>
 
-<body>
+<body style="text-align:center;font-family:Arial;padding:40px">
 
-<div class="header">Carechain</div>
+<h3>CareChain</h3>
 
-<div class="nav">
-  <button onclick="show('home')">Home</button>
-  <button onclick="show('submit')">Ajukan</button>
-  <button onclick="show('admin')">Dashboard</button>
-</div>
-
-<div id="home" class="page active"></div>
-
-<div id="submit" class="page">
-  <div class="card">
-    <h3>Ajukan Bantuan</h3>
-    <input id="name" placeholder="Nama">
-    <input id="title" placeholder="Judul Kasus">
-    <textarea id="desc" placeholder="Deskripsi"></textarea>
-    <input id="cost" placeholder="Estimasi biaya (Pi)">
-    <input type="file" id="img">
-    <button onclick="add()" class="donate">Kirim</button>
-  </div>
-</div>
-
-<div id="admin" class="page">
-  <div class="card">
-    <h3>Dashboard</h3>
-    <input type="password" id="pass" placeholder="Password admin">
-    <button onclick="login()" class="admin">Login</button>
-  </div>
-  <div id="adminBox"></div>
-</div>
-
-<div class="card" style="margin:20px; text-align:center;">
-  <h3>Dukung Proyek Ini</h3>
-  <p>Carechain Donation System (Demo)</p>
-  <p style="font-size:12px;color:gray;">*Pi Test / App Mode</p>
-</div>
+<button onclick="donate()">Donate 1 Pi</button>
 
 <script>
 Pi.init({ version: "2.0" });
 
-let posts = [];
-let admin = false;
-
-function show(p){
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  document.getElementById(p).classList.add('active');
-}
-
-function add(){
-  let name = document.getElementById("name").value;
-  let title = document.getElementById("title").value;
-  let desc = document.getElementById("desc").value;
-  let cost = document.getElementById("cost").value;
-  let img = document.getElementById("img").files[0];
-
-  let imgURL = img ? URL.createObjectURL(img) : "";
-
-  posts.push({ name, title, desc, cost: parseInt(cost), img, raised: 0, status:"active" });
-
-  alert("Kasus terkirim");
-  render();
-}
-
-async function donate(i){
+async function donate() {
   try {
+    await Pi.authenticate(["payments"]);
     await Pi.createPayment({
       amount: 1,
-      memo: "CareChain Donation",
-      metadata: {
-        case: posts[i].title
-      }
+      memo: "CareChain Donation"
     });
-
-    alert("Silakan konfirmasi di Pi Wallet");
-  } catch(e){
-    console.log(e);
-    alert("Donasi gagal");
+    alert("Konfirmasi di Pi Wallet");
+  } catch(e) {
+    alert("Gagal");
   }
 }
-
-function login(){
-  let p = document.getElementById("pass").value;
-  if(p === "292603$+"){
-    admin = true;
-    alert("Login sukses");
-    renderAdmin();
-  } else {
-    alert("Password salah");
-  }
-}
-
-function closeCase(i){
-  posts[i].status = "closed";
-  render();
-  renderAdmin();
-}
-
-function render(){
-  let html = "";
-
-  posts.forEach((p,i)=>{
-    let percent = (p.raised / p.cost) * 100 || 0;
-
-    html += `
-    <div class="card">
-      <span class="badge">${p.status}</span>
-      <h3>${p.title}</h3>
-      <b>${p.name}</b>
-      <p>${p.desc}</p>
-      ${p.img ? `<img src="${p.img}">` : ""}
-      <p>${p.raised} / ${p.cost} Pi</p>
-
-      <div class="progress">
-        <div class="bar" style="width:${percent}%"></div>
-      </div>
-
-      <button class="donate" onclick="donate(${i})">
-        Donate Pi
-      </button>
-    </div>`;
-  });
-
-  document.getElementById("home").innerHTML = html;
-}
-
-function renderAdmin(){
-  if(!admin) return;
-
-  let html = "";
-
-  posts.forEach((p,i)=>{
-    html += `
-    <div class="card">
-      <h3>${p.title}</h3>
-      <p>${p.status}</p>
-      <button class="admin" onclick="closeCase(${i})">Selesai</button>
-    </div>`;
-  });
-
-  document.getElementById("adminBox").innerHTML = html;
-}
-
-render();
 </script>
 
 </body>
-    </html>
+</html>
