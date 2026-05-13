@@ -11,7 +11,6 @@
       background: #e9ebee;
     }
 
-    /* HEADER */
     .header {
       background: #1877f2;
       color: white;
@@ -21,7 +20,6 @@
       font-weight: bold;
     }
 
-    /* NAV */
     .nav {
       display: flex;
     }
@@ -31,15 +29,12 @@
       padding: 10px;
       border: none;
       background: #fff;
-      cursor: pointer;
       font-weight: bold;
     }
 
-    .nav button:hover {
-      background: #f0f0f0;
-    }
+    .page { display: none; }
+    .active { display: block; }
 
-    /* POST CARD */
     .card {
       background: white;
       margin: 10px;
@@ -49,14 +44,13 @@
     }
 
     .badge {
-      display: inline-block;
       background: #f1f1f1;
       padding: 5px 8px;
       border-radius: 8px;
       font-size: 12px;
     }
 
-    img, video {
+    img {
       width: 100%;
       border-radius: 10px;
       margin-top: 10px;
@@ -68,20 +62,19 @@
       border-radius: 8px;
       width: 100%;
       margin-top: 8px;
-      cursor: pointer;
     }
 
-    .donate-btn {
+    .donate {
       background: #42b72a;
       color: white;
     }
 
-    .admin-btn {
+    .admin {
       background: #333;
       color: white;
     }
 
-    input, textarea, select {
+    input, textarea {
       width: 100%;
       padding: 10px;
       margin-top: 8px;
@@ -89,20 +82,15 @@
       border: 1px solid #ccc;
     }
 
-    .page { display: none; }
-    .active { display: block; }
-
     .progress {
       background: #ddd;
       border-radius: 8px;
       overflow: hidden;
-      margin-top: 5px;
     }
 
     .bar {
       height: 10px;
       background: #42b72a;
-      width: 0%;
     }
   </style>
 </head>
@@ -112,12 +100,12 @@
 <div class="header">Carechain</div>
 
 <div class="nav">
-  <button onclick="showPage('home')">Home</button>
-  <button onclick="showPage('submit')">Ajukan</button>
-  <button onclick="showPage('admin')">Dashboard</button>
+  <button onclick="show('home')">Home</button>
+  <button onclick="show('submit')">Ajukan</button>
+  <button onclick="show('admin')">Dashboard</button>
 </div>
 
-<!-- HOME FEED -->
+<!-- HOME -->
 <div id="home" class="page active"></div>
 
 <!-- SUBMIT -->
@@ -127,99 +115,110 @@
 
     <input id="name" placeholder="Nama">
     <input id="title" placeholder="Judul Kasus">
-    <textarea id="desc" placeholder="Deskripsi masalah"></textarea>
+    <textarea id="desc" placeholder="Deskripsi"></textarea>
     <input id="cost" placeholder="Estimasi biaya (Pi)">
     <input type="file" id="img">
 
-    <button onclick="addPost()" class="donate-btn">Kirim</button>
+    <button onclick="add()" class="donate">Kirim</button>
   </div>
 </div>
 
-<!-- ADMIN DASHBOARD -->
+<!-- ADMIN -->
 <div id="admin" class="page">
   <div class="card">
     <h3>Carechain Dashboard</h3>
     <input type="password" id="pass" placeholder="Password admin">
-    <button onclick="loginAdmin()">Login</button>
+    <button onclick="login()" class="admin">Login</button>
   </div>
 
-  <div id="adminPanel"></div>
+  <div id="adminBox"></div>
+</div>
+
+<!-- SUPPORT PROJECT -->
+<div class="card" style="margin:20px; text-align:center;">
+  <h3>Dukung Proyek Ini</h3>
+
+  <p>
+    Bantu pengembangan Carechain dengan donasi <b>5 Pi</b>.
+  </p>
+
+  <p><b>Alamat Dompet Pi:</b></p>
+
+  <p style="word-break:break-all;">
+    <b id="walletAddress">
+      GD66IDDTAFLJHGDLNVPSYA4MYPMKDBBKWD5C3SQ2MEZTED7FCKRXELMR
+    </b>
+  </p>
+
+  <button onclick="copyWallet()" style="background:#1877f2; color:white;">
+    Salin Alamat
+  </button>
+
+  <p style="font-size:12px;color:gray;">
+    *Demo project Carechain
+  </p>
 </div>
 
 <script>
 let posts = [];
 let admin = false;
 
-/* NAV */
-function showPage(page){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(page).classList.add('active');
+function show(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById(p).classList.add('active');
 }
 
-/* ADD POST */
-function addPost(){
+function add(){
   let name = document.getElementById("name").value;
   let title = document.getElementById("title").value;
   let desc = document.getElementById("desc").value;
   let cost = document.getElementById("cost").value;
-  let imgFile = document.getElementById("img").files[0];
+  let img = document.getElementById("img").files[0];
 
-  if(!name || !title || !desc){
-    alert("Isi lengkap dulu");
-    return;
-  }
-
-  let imgURL = imgFile ? URL.createObjectURL(imgFile) : "";
+  let imgURL = img ? URL.createObjectURL(img) : "";
 
   posts.push({
-    name,
-    title,
-    desc,
-    cost,
+    name, title, desc, cost,
     img: imgURL,
     raised: 0,
     status: "active"
   });
 
-  alert("Berhasil dikirim");
+  alert("Kasus dikirim");
   render();
 }
 
-/* DONATE (SIMULATION / PI READY PLACEHOLDER) */
 function donate(i){
-  let amount = prompt("Masukkan jumlah donasi (Pi):");
+  let amount = prompt("Donasi Pi:");
   if(!amount) return;
 
   posts[i].raised += parseInt(amount);
-
-  alert("Donasi simulasi: " + amount + " Pi (nanti diganti Pi SDK real)");
   render();
 }
 
-/* ADMIN LOGIN */
-function loginAdmin(){
-  let pass = document.getElementById("pass").value;
-  if(pass === "292603$"){
+function login(){
+  let p = document.getElementById("pass").value;
+  if(p === "292603$+"){
     admin = true;
-    alert("Login berhasil");
+    alert("Login sukses");
     renderAdmin();
   } else {
     alert("Password salah");
   }
 }
 
-/* ADMIN ACTION */
 function closeCase(i){
   posts[i].status = "closed";
   render();
   renderAdmin();
 }
 
-/* RENDER HOME */
 function render(){
   let html = "";
 
   posts.forEach((p,i)=>{
+    let percent = (p.raised / p.cost) * 100;
+
     html += `
     <div class="card">
       <span class="badge">${p.status}</span>
@@ -229,14 +228,13 @@ function render(){
 
       ${p.img ? `<img src="${p.img}">` : ""}
 
-      <p>Target: ${p.cost} Pi</p>
-      <p>Terkumpul: ${p.raised} Pi</p>
+      <p>${p.raised} / ${p.cost} Pi</p>
 
       <div class="progress">
-        <div class="bar" style="width:${Math.min((p.raised/p.cost)*100,100)}%"></div>
+        <div class="bar" style="width:${percent}%"></div>
       </div>
 
-      <button class="donate-btn" onclick="donate(${i})">Donasi Pi</button>
+      <button class="donate" onclick="donate(${i})">Donasi</button>
     </div>
     `;
   });
@@ -244,7 +242,6 @@ function render(){
   document.getElementById("home").innerHTML = html;
 }
 
-/* RENDER ADMIN */
 function renderAdmin(){
   if(!admin) return;
 
@@ -254,20 +251,22 @@ function renderAdmin(){
     html += `
     <div class="card">
       <h3>${p.title}</h3>
-      <p>Status: ${p.status}</p>
-      <p>Terkumpul: ${p.raised} / ${p.cost} Pi</p>
-
-      <button class="admin-btn" onclick="closeCase(${i})">
-        Tandai Selesai
-      </button>
+      <p>${p.status}</p>
+      <button class="admin" onclick="closeCase(${i})">Selesai</button>
     </div>
     `;
   });
 
-  document.getElementById("adminPanel").innerHTML = html;
+  document.getElementById("adminBox").innerHTML = html;
 }
 
-/* INIT */
+function copyWallet(){
+  navigator.clipboard.writeText(
+    "GD66IDDTAFLJHGDLNVPSYA4MYPMKDBBKWD5C3SQ2MEZTED7FCKRXELMR"
+  );
+  alert("Wallet disalin");
+}
+
 render();
 </script>
 
