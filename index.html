@@ -1,142 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CareChain</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CareChain</title>
+    <!-- SDK Pi Network -->
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
-<style>
-body{
-font-family:Arial,sans-serif;
-max-width:800px;
-margin:auto;
-padding:20px;
-background:#f7f7f7;
-}
-
-.header{
-background:white;
-padding:20px;
-border-radius:10px;
-margin-bottom:20px;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:10px;
-margin-top:15px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
-}
-
-button{
-padding:10px 15px;
-font-size:16px;
-cursor:pointer;
-}
-
-#user{
-font-weight:bold;
-color:green;
-margin-top:10px;
-}
-</style>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; background: #f7f7f7; }
+        .header { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; margin-top: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        button { padding: 12px 20px; font-size: 16px; cursor: pointer; background-color: #53459b; color: white; border: none; border-radius: 5px; margin-top: 10px; }
+        #user { font-weight: bold; color: green; margin-top: 10px; }
+    </style>
 </head>
-
 <body>
 
 <div class="header">
-<h1>CareChain</h1>
-<p>Community support powered by Pi Network.</p>
-
-<button onclick="loginPi()">
-Login With Pi
-</button>
-
-<p id="user"></p>
+    <h1>CareChain</h1>
+    <p>Community support powered by Pi Network.</p>
+    <button onclick="loginPi()">Login With Pi</button>
+    <p id="user"></p>
 </div>
 
 <div class="card">
-<h2>Bantuan Pendidikan</h2>
-
-<p>
-Membantu siswa yang kesulitan biaya sekolah.
-</p>
-
-<p>
-<b>Target:</b> 100 Pi
-</p>
-
-<button onclick="donate()">
-Donasi 1 Pi
-</button>
+    <h2>Bantuan Pendidikan</h2>
+    <p>Membantu siswa yang kesulitan biaya sekolah.</p>
+    <p><b>Target:</b> 100 Pi</p>
+    <button onclick="donate(1)">Donasi 1 Pi</button>
 </div>
 
 <div class="card">
-<h2>Bantuan Kesehatan</h2>
-
-<p>
-Membantu biaya pengobatan masyarakat kurang mampu.
-</p>
-
-<p>
-<b>Target:</b> 250 Pi
-</p>
-
-<button onclick="donateHealth()">
-Donasi 5 Pi
-</button>
+    <h2>Bantuan Kesehatan</h2>
+    <p>Membantu biaya pengobatan masyarakat kurang mampu.</p>
+    <p><b>Target:</b> 250 Pi</p>
+    <button onclick="donate(5)">Donasi 5 Pi</button>
 </div>
 
 <script>
+    // Inisialisasi SDK Pi
+    Pi.init({ version: "2.0", sandbox: true });
 
-Pi.init({
-version:"2.0",
-sandbox:true
-});
+    async function loginPi() {
+        try {
+            const auth = await Pi.authenticate(["username"], () => {});
+            document.getElementById("user").innerHTML = "Login berhasil: " + auth.user.username;
+        } catch (e) {
+            alert("Login gagal");
+            console.error(e);
+        }
+    }
 
-async function loginPi(){
-
-try{
-
-const scopes=["username"];
-
-const auth=await Pi.authenticate(
-scopes,
-function(){}
-);
-
-document.getElementById("user").innerHTML=
-"Login berhasil: "+auth.user.username;
-
-}catch(e){
-
-alert("Login gagal");
-
-console.log(e);
-
-}
-
-}
-
-function donate(){
-
-alert(
-"Terima kasih.\n\nSimulasi donasi 1 Pi berhasil.\n\nPembayaran Pi sungguhan akan ditambahkan setelah backend tersedia."
-);
-
-}
-
-function donateHealth(){
-
-alert(
-"Terima kasih.\n\nSimulasi donasi 5 Pi berhasil.\n\nPembayaran Pi sungguhan akan ditambahkan setelah backend tersedia."
-);
-
-}
-
+    // Fungsi Payment ke Pi Testnet
+    async function donate(amount) {
+        try {
+            const payment = await Pi.createPayment({
+                amount: amount,
+                memo: "Donasi via CareChain",
+                metadata: { type: "donasi" },
+            }, {
+                onReadyForServerApproval: (paymentId) => {
+                    alert("Pembayaran dibuat (ID: " + paymentId + "). Silakan konfirmasi di aplikasi.");
+                    // Di sini seharusnya memanggil backend Anda untuk Approval
+                },
+                onReadyForServerCompletion: (paymentId, txid) => {
+                    alert("Donasi Sukses! Transaksi: " + txid);
+                },
+                onCancel: (paymentId) => {
+                    alert("Donasi dibatalkan.");
+                },
+                onError: (error, payment) => {
+                    alert("Error: " + error.message);
+                }
+            });
+        } catch (e) {
+            console.error(e);
+            alert("Terjadi kesalahan saat memproses donasi.");
+        }
+    }
 </script>
 
 </body>
