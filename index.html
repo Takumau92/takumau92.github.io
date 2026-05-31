@@ -1,64 +1,61 @@
-<!DOCTYPE html>
-<html lang="id">
+here<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareChain Social</title>
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-    <style>
-        body { margin: 0; background: #f0f2f5; font-family: Arial, sans-serif; }
-        .header { background: #6d3cc7; color: white; padding: 15px; text-align: center; font-weight: bold; position: sticky; top: 0; }
-        .container { max-width: 500px; margin: auto; padding: 15px; }
-        .post { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .donate { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; width: 100%; }
-        /* Style lainnya tetap sama seperti kode awal Anda */
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CareChain</title>
+
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
+<style>
+body{
+font-family:Arial,sans-serif;
+max-width:700px;
+margin:auto;
+padding:20px;
+}
+.card{
+border:1px solid #ddd;
+padding:15px;
+border-radius:10px;
+margin-top:15px;
+}
+button{
+padding:10px 15px;
+font-size:16px;
+}
+</style>
 </head>
+
 <body>
 
-<div class="header">CareChain</div>
-<div class="container">
-    <div class="post">
-        <h3>Mari Berdonasi</h3>
-        <button class="donate" onclick="processPayment()">Donasi 1 Pi</button>
-    </div>
-    <div id="feed"></div>
+<h1>CareChain</h1>
+<p>Community support powered by Pi Network.</p>
+
+<button onclick="loginPi()">Login With Pi</button>
+
+<p id="user"></p>
+
+<div class="card">
+<h3>Bantuan Pendidikan</h3>
+<p>Membantu siswa yang kesulitan biaya sekolah.</p>
+<p>Target: 100 Pi</p>
+<button>Donasi Pi</button>
 </div>
 
 <script>
-    // 1. Inisialisasi SDK
-    const Pi = window.Pi;
-    Pi.init({ version: "2.0" });
+Pi.init({ version: "2.0", sandbox: true });
 
-    // 2. Fungsi Pembayaran Utama
-    async function processPayment() {
-        try {
-            const payment = await Pi.createPayment({
-                amount: 1.0,
-                memo: "Donasi untuk CareChain",
-                metadata: { orderId: "donasi-123" },
-            }, {
-                onReadyForServerApproval: (paymentId) => {
-                    console.log("Payment ID:", paymentId);
-                    alert("Mengirim ke server untuk persetujuan...");
-                    // PENTING: Kirim paymentId ini ke server backend Anda (API Anda)
-                    // Contoh: fetch('/approve', { method: 'POST', body: JSON.stringify({paymentId}) })
-                },
-                onReadyForServerCompletion: (paymentId, txid) => {
-                    alert("Donasi Berhasil! TxID: " + txid);
-                },
-                onCancel: (paymentId) => {
-                    alert("Donasi dibatalkan.");
-                },
-                onError: (error, payment) => {
-                    console.error("Error:", error);
-                    alert("Terjadi kesalahan teknis.");
-                }
-            });
-        } catch (err) {
-            console.error("Gagal memulai pembayaran:", err);
-        }
-    }
+async function loginPi() {
+try {
+const scopes = ['username'];
+const auth = await Pi.authenticate(scopes, function(){});
+document.getElementById("user").innerHTML =
+"Login berhasil: " + auth.user.username;
+} catch(e){
+console.log(e);
+}
+}
 </script>
 
 </body>
